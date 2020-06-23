@@ -9,6 +9,14 @@
       <!-- <div class="result">
         {{ searchedResult }}
       </div> -->
+      <div class="sort">
+        Sort: Name:
+        <select v-model="sortBy" name="type">
+          <option value="normal" selected>Normal</option>
+          <option value="asc">Ascending</option>
+          <option value="desc">Descending</option>
+        </select>
+      </div>
     </div>
     <div class="body">
       <table>
@@ -62,6 +70,7 @@ export default {
   data() {
     return {
       searchedName: '',
+      sortBy: '',
       tableData: [],
       tableHeaders: [
         { text: 'ID', value: 'id' },
@@ -129,11 +138,46 @@ export default {
     updateAnEmployee(data) {
       this.employeeData = data;
       this.showAndUpdateCreateEmployeeModal = true;
+    },
+    sort(data, type) {
+      if (type == 'asc') {
+        return data.sort((a, b) => {
+          let nameA = a.preferredFullName.toLowerCase();
+          let nameB = b.preferredFullName.toLowerCase();
+          
+          if (nameA < nameB) {
+              return -1;
+          }
+          if (nameA > nameB) {
+              return 1;
+          }
+          return 0;
+        });
+      } else {
+        return data.sort((a, b) => {
+          let nameA = a.preferredFullName.toLowerCase();
+          let nameB = b.preferredFullName.toLowerCase();
+          
+          if (nameA > nameB) {
+              return -1;
+          }
+          if (nameA < nameB) {
+              return 1;
+          }
+          return 0;
+        });
+      }
     }
   },
   computed: {
     searchedResult() {
-      return this.tableData.filter((item) => item.preferredFullName.toLowerCase().indexOf(this.searchedName) >= 0);
+      let data = this.tableData.filter((item) => item.preferredFullName.toLowerCase().includes(this.searchedName));
+
+      if (this.sortBy == 'asc' || this.sortBy == 'desc') {
+        return this.sort(data, this.sortBy);
+      } else {
+        return data;
+      }
     }
   }
 }
