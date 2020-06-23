@@ -51,6 +51,14 @@
       />
 
     </div>
+
+    <div class="footer flex justify-between align-center">
+      <button :disabled="disablePrevious" @click="previousPage">Prev</button>
+      <div class="text">
+        Page {{ currentPage }} of {{ totalPages }}
+      </div>
+      <button :disabled="disableNext" @click="nextPage">Next</button>
+    </div>
   </div>
 </template>
 
@@ -71,7 +79,7 @@ export default {
     return {
       searchedName: '',
       sortBy: '',
-      tableData: [],
+      allEmployees: [],
       tableHeaders: [
         { text: 'ID', value: 'id' },
         { text: 'Full Name', value: 'preferredFullName' },
@@ -85,7 +93,13 @@ export default {
       ],
       employeeData: {},
       showViewEmployeeModal: false,
-      showAndUpdateCreateEmployeeModal: false
+      showAndUpdateCreateEmployeeModal: false,
+
+      // pagination
+      // allEmployees,
+      employeesToDisplay: [],
+      perPage: 10,
+      currentPage: 1
     };
   },
   methods: {
@@ -94,11 +108,31 @@ export default {
       fetch(url)
       .then((response) => response.json())
       .then((data) => {
-        this.tableData = data;
+        this.allEmployees = data;
+        this.paginateData();
       })
       .catch((err) => {
         console.log(err);
       });
+    },
+    paginateData() {
+      this.employeesToDisplay = [];
+
+      const lastPageInDecimal = this.allEmployees.length / this.perPage;
+      const lastPage = Math.ceil(lastPageInDecimal);
+      
+      let last = this.currentPage * this.perPage;
+      let first = last - this.perPage;
+
+      if(lastPage == this.currentPage) {
+        last = this.allEmployees.length;
+      }
+
+      for (let index = first; index < last; index++) {
+        this.employeesToDisplay.push(this.allEmployees[index]);
+      }
+
+      // result -> this.employeesToDisplay
     },
     createEmployee() {
       this.employeeData = null;
@@ -167,17 +201,36 @@ export default {
           return 0;
         });
       }
+    },
+    nextPage() {
+      this.currentPage++;
+      this.paginateData();
+    },
+    previousPage() {
+      this.currentPage--;
+      this.paginateData();
     }
   },
   computed: {
     searchedResult() {
-      let data = this.tableData.filter((item) => item.preferredFullName.toLowerCase().includes(this.searchedName));
+      let data = this.employeesToDisplay.filter((item) => item.preferredFullName.toLowerCase().includes(this.searchedName));
 
       if (this.sortBy == 'asc' || this.sortBy == 'desc') {
         return this.sort(data, this.sortBy);
       } else {
         return data;
       }
+    },
+    totalPages() {
+      const lastPageInDecimal = this.allEmployees.length / this.perPage;
+      const lastPage = Math.ceil(lastPageInDecimal);
+      return lastPage;
+    },
+    disableNext() {
+      return this.currentPage == this.totalPages;
+    },
+    disablePrevious() {
+      return this.currentPage == 1;
     }
   }
 }
@@ -209,5 +262,8 @@ export default {
 }
 .home-component .body table tr:hover {
   background: #ececec;
+}
+.home-component .footer {
+  margin-top: 1rem;
 }
 </style>
