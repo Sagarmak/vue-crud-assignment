@@ -4,12 +4,18 @@
       <div class="title">Employees</div>
       <div class="button" @click="createEmployee"><button>Create</button></div>
     </div>
+    <div class="mini-header flex justify-between align-center">
+      <input v-model="searchedName" type="text" name="" placeholder="Search Name">
+      <!-- <div class="result">
+        {{ searchedResult }}
+      </div> -->
+    </div>
     <div class="body">
       <table>
         <tr>
           <th v-for="header in tableHeaders" :key="header.value" class="bold">{{ header.text }}</th>
         </tr>
-        <tr v-for="data in tableData" :key="data.id">
+        <tr v-for="data in searchedResult" :key="data.id">
             <td @click="showEmployee(data)">{{ data.id }}</td>
             <td>{{ data.preferredFullName }}</td>
             <td>{{ data.employeeCode }}</td>
@@ -55,6 +61,7 @@ export default {
   },
   data() {
     return {
+      searchedName: '',
       tableData: [],
       tableHeaders: [
         { text: 'ID', value: 'id' },
@@ -123,6 +130,11 @@ export default {
       this.employeeData = data;
       this.showAndUpdateCreateEmployeeModal = true;
     }
+  },
+  computed: {
+    searchedResult() {
+      return this.tableData.filter((item) => item.preferredFullName.toLowerCase().indexOf(this.searchedName) >= 0);
+    }
   }
 }
 </script>
@@ -131,8 +143,8 @@ export default {
 .home-component {
   /*  */
 }
-.home-component .header {
-  padding-bottom: 2rem;
+.home-component .header, .home-component .mini-header {
+  padding-bottom: 1rem;
 }
 .home-component .header .button button {
   color: white;
@@ -150,5 +162,8 @@ export default {
 .home-component .body table th, td {
   padding: 5px;
   border: solid 1px black;
+}
+.home-component .body table tr:hover {
+  background: #ececec;
 }
 </style>

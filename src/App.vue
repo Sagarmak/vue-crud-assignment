@@ -47,7 +47,6 @@ body {
   margin: 0 auto;
   max-width: 80%;
   padding: 2rem;
-  padding-bottom: 0;
 }
 
 /* Flexbox Helper */
